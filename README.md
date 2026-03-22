@@ -1,11 +1,11 @@
-# @tradebuddy/sdk
+# sdk
 
 TypeScript SDK for the [Trade Buddy](https://mytradebuddy.com) API
 
 ## Installation
 
 ```bash
-npm install @tradebuddy/sdk
+npm install @tradebuddyhq/sdk
 ```
 
 > Requires Node.js 18+ 
@@ -13,7 +13,7 @@ npm install @tradebuddy/sdk
 ## Quick Start
 
 ```ts
-import { TradeBuddy } from '@tradebuddy/sdk';
+import { TradeBuddy } from '@tradebuddyhq/sdk';
 
 const client = new TradeBuddy();
 
@@ -129,7 +129,7 @@ client.isAuthenticated();   // boolean
 All errors are thrown as `TradeBuddyError`:
 
 ```ts
-import { TradeBuddy, TradeBuddyError } from '@tradebuddy/sdk';
+import { TradeBuddy, TradeBuddyError } from '@tradebuddyhq/sdk';
 
 try {
   await client.signIn({ email: 'bad@example.com', password: 'wrong' });
