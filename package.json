@@ -1,5 +1,5 @@
 {
-  "name": "@tradebuddy/sdk",
+  "name": "@tradebuddyhq/sdk",
   "version": "1.0.0",
   "description": "TypeScript SDK for the Trade Buddy API",
   "type": "module",
