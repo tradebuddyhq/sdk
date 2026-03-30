@@ -7,6 +7,14 @@ import type {
   SuccessResponse,
   ListingsResponse,
   CreateListingResponse,
+  CreateWebhookInput,
+  Webhook,
+  CreateWebhookResponse,
+  ListWebhooksResponse,
+  CreateApiKeyInput,
+  ApiKey,
+  CreateApiKeyResponse,
+  ListApiKeysResponse,
 } from './types.js';
 
 const DEFAULT_BASE_URL = 'https://mytradebuddy.com/api';
@@ -44,10 +52,12 @@ export class TradeBuddyError extends Error {
 export class TradeBuddy {
   private readonly baseUrl: string;
   private token: string | null;
+  private readonly apiKey: string | null;
 
   constructor(config: TradeBuddyConfig = {}) {
     this.baseUrl = (config.baseUrl ?? DEFAULT_BASE_URL).replace(/\/+$/, '');
     this.token = config.token ?? null;
+    this.apiKey = config.apiKey ?? null;
   }
 
   // ---------------------------------------------------------------------------
@@ -151,6 +161,72 @@ export class TradeBuddy {
   }
 
   // ---------------------------------------------------------------------------
+  // Webhooks
+  // ---------------------------------------------------------------------------
+
+  /** Create a new webhook subscription. Requires authentication. */
+  async createWebhook(input: CreateWebhookInput): Promise<Webhook> {
+    this.requireAuth();
+    const data = await this.request<CreateWebhookResponse>(
+      '/webhooks.php?action=create',
+      { method: 'POST', body: input, auth: true },
+    );
+    return data.webhook;
+  }
+
+  /** List all webhook subscriptions. Requires authentication. */
+  async listWebhooks(): Promise<Webhook[]> {
+    this.requireAuth();
+    const data = await this.request<ListWebhooksResponse>(
+      '/webhooks.php?action=list',
+      { method: 'GET', auth: true },
+    );
+    return data.webhooks;
+  }
+
+  /** Delete a webhook subscription. Requires authentication. */
+  async deleteWebhook(webhookId: string): Promise<void> {
+    this.requireAuth();
+    await this.request<SuccessResponse>(
+      '/webhooks.php?action=delete',
+      { method: 'POST', body: { id: webhookId }, auth: true },
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // API Keys
+  // ---------------------------------------------------------------------------
+
+  /** Create a new API key. Requires authentication. */
+  async createApiKey(input: CreateApiKeyInput): Promise<ApiKey> {
+    this.requireAuth();
+    const data = await this.request<CreateApiKeyResponse>(
+      '/keys.php?action=create',
+      { method: 'POST', body: input, auth: true },
+    );
+    return data.apiKey;
+  }
+
+  /** List all API keys for the authenticated user. */
+  async listApiKeys(): Promise<ApiKey[]> {
+    this.requireAuth();
+    const data = await this.request<ListApiKeysResponse>(
+      '/keys.php?action=list',
+      { method: 'GET', auth: true },
+    );
+    return data.apiKeys;
+  }
+
+  /** Revoke an API key. Requires authentication. */
+  async revokeApiKey(keyId: string): Promise<void> {
+    this.requireAuth();
+    await this.request<SuccessResponse>(
+      '/keys.php?action=revoke',
+      { method: 'POST', body: { id: keyId }, auth: true },
+    );
+  }
+
+  // ---------------------------------------------------------------------------
   // Token helpers
   // ---------------------------------------------------------------------------
 
@@ -174,9 +250,9 @@ export class TradeBuddy {
   // ---------------------------------------------------------------------------
 
   private requireAuth(): void {
-    if (!this.token) {
+    if (!this.token && !this.apiKey) {
       throw new TradeBuddyError(
-        'Authentication required. Call signIn() or signUp() first.',
+        'Authentication required. Call signIn(), signUp(), or provide an apiKey.',
       );
     }
   }
@@ -193,8 +269,12 @@ export class TradeBuddy {
 
     const headers: Record<string, string> = {};
 
-    if (options.auth && this.token) {
-      headers['Authorization'] = `Bearer ${this.token}`;
+    if (options.auth) {
+      if (this.apiKey) {
+        headers['Authorization'] = `Bearer ${this.apiKey}`;
+      } else if (this.token) {
+        headers['Authorization'] = `Bearer ${this.token}`;
+      }
     }
 
     let fetchInit: RequestInit;

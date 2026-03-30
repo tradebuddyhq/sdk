@@ -1,4 +1,4 @@
-import type { TradeBuddyConfig, Session, Listing, CreateListingInput } from './types.js';
+import type { TradeBuddyConfig, Session, Listing, CreateListingInput, CreateWebhookInput, Webhook, CreateApiKeyInput, ApiKey } from './types.js';
 /**
  * Typed error thrown by the TradeBuddy SDK when an API request fails
  * or returns an unsuccessful response.
@@ -22,6 +22,7 @@ export declare class TradeBuddyError extends Error {
 export declare class TradeBuddy {
     private readonly baseUrl;
     private token;
+    private readonly apiKey;
     constructor(config?: TradeBuddyConfig);
     /**
      * Create a new account.
@@ -60,6 +61,18 @@ export declare class TradeBuddy {
     getListings(): Promise<Listing[]>;
     /** Create a new listing. Requires authentication. */
     createListing(input: CreateListingInput): Promise<string>;
+    /** Create a new webhook subscription. Requires authentication. */
+    createWebhook(input: CreateWebhookInput): Promise<Webhook>;
+    /** List all webhook subscriptions. Requires authentication. */
+    listWebhooks(): Promise<Webhook[]>;
+    /** Delete a webhook subscription. Requires authentication. */
+    deleteWebhook(webhookId: string): Promise<void>;
+    /** Create a new API key. Requires authentication. */
+    createApiKey(input: CreateApiKeyInput): Promise<ApiKey>;
+    /** List all API keys for the authenticated user. */
+    listApiKeys(): Promise<ApiKey[]>;
+    /** Revoke an API key. Requires authentication. */
+    revokeApiKey(keyId: string): Promise<void>;
     /** Returns the current bearer token, or `null` if not authenticated. */
     getToken(): string | null;
     /** Manually set the bearer token (e.g. to restore a previous session). */

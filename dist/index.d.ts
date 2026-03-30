@@ -1,3 +1,3 @@
 export { TradeBuddy, TradeBuddyError } from './client.js';
-export type { TradeBuddyConfig, User, Session, Listing, CreateListingInput, ListingType, Category, Condition, ApiResponse, AuthResponse, SuccessResponse, ListingsResponse, CreateListingResponse, } from './types.js';
+export type { TradeBuddyConfig, User, Session, Listing, CreateListingInput, ListingType, Category, Condition, ApiResponse, AuthResponse, SuccessResponse, ListingsResponse, CreateListingResponse, WebhookEvent, CreateWebhookInput, Webhook, CreateWebhookResponse, ListWebhooksResponse, ApiKeyType, ApiKeyScope, CreateApiKeyInput, ApiKey, CreateApiKeyResponse, ListApiKeysResponse, } from './types.js';
 //# sourceMappingURL=index.d.ts.map

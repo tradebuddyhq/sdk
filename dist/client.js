@@ -26,6 +26,7 @@ export class TradeBuddy {
     constructor(config = {}) {
         this.baseUrl = (config.baseUrl ?? DEFAULT_BASE_URL).replace(/\/+$/, '');
         this.token = config.token ?? null;
+        this.apiKey = config.apiKey ?? null;
     }
     // ---------------------------------------------------------------------------
     // Auth
@@ -105,6 +106,46 @@ export class TradeBuddy {
         return data.id;
     }
     // ---------------------------------------------------------------------------
+    // Webhooks
+    // ---------------------------------------------------------------------------
+    /** Create a new webhook subscription. Requires authentication. */
+    async createWebhook(input) {
+        this.requireAuth();
+        const data = await this.request('/webhooks.php?action=create', { method: 'POST', body: input, auth: true });
+        return data.webhook;
+    }
+    /** List all webhook subscriptions. Requires authentication. */
+    async listWebhooks() {
+        this.requireAuth();
+        const data = await this.request('/webhooks.php?action=list', { method: 'GET', auth: true });
+        return data.webhooks;
+    }
+    /** Delete a webhook subscription. Requires authentication. */
+    async deleteWebhook(webhookId) {
+        this.requireAuth();
+        await this.request('/webhooks.php?action=delete', { method: 'POST', body: { id: webhookId }, auth: true });
+    }
+    // ---------------------------------------------------------------------------
+    // API Keys
+    // ---------------------------------------------------------------------------
+    /** Create a new API key. Requires authentication. */
+    async createApiKey(input) {
+        this.requireAuth();
+        const data = await this.request('/keys.php?action=create', { method: 'POST', body: input, auth: true });
+        return data.apiKey;
+    }
+    /** List all API keys for the authenticated user. */
+    async listApiKeys() {
+        this.requireAuth();
+        const data = await this.request('/keys.php?action=list', { method: 'GET', auth: true });
+        return data.apiKeys;
+    }
+    /** Revoke an API key. Requires authentication. */
+    async revokeApiKey(keyId) {
+        this.requireAuth();
+        await this.request('/keys.php?action=revoke', { method: 'POST', body: { id: keyId }, auth: true });
+    }
+    // ---------------------------------------------------------------------------
     // Token helpers
     // ---------------------------------------------------------------------------
     /** Returns the current bearer token, or `null` if not authenticated. */
@@ -123,15 +164,20 @@ export class TradeBuddy {
     // Internal
     // ---------------------------------------------------------------------------
     requireAuth() {
-        if (!this.token) {
-            throw new TradeBuddyError('Authentication required. Call signIn() or signUp() first.');
+        if (!this.token && !this.apiKey) {
+            throw new TradeBuddyError('Authentication required. Call signIn(), signUp(), or provide an apiKey.');
         }
     }
     async request(path, options) {
         const url = `${this.baseUrl}${path}`;
         const headers = {};
-        if (options.auth && this.token) {
-            headers['Authorization'] = `Bearer ${this.token}`;
+        if (options.auth) {
+            if (this.apiKey) {
+                headers['Authorization'] = `Bearer ${this.apiKey}`;
+            }
+            else if (this.token) {
+                headers['Authorization'] = `Bearer ${this.token}`;
+            }
         }
         let fetchInit;
         if (options.method === 'GET') {

@@ -4,6 +4,8 @@ export interface TradeBuddyConfig {
     baseUrl?: string;
     /** Optional bearer token to restore a previous session. */
     token?: string;
+    /** Optional API key for authentication instead of email/password. */
+    apiKey?: string;
 }
 /** A Trade Buddy user. */
 export interface User {
@@ -63,5 +65,58 @@ export interface ListingsResponse extends ApiResponse {
 /** API response for creating a listing. */
 export interface CreateListingResponse extends ApiResponse {
     id: string;
+}
+/** Supported webhook event types. */
+export type WebhookEvent = 'listing.created' | 'listing.sold' | 'listing.deleted' | 'user.created' | 'user.deleted';
+/** Input for creating a webhook subscription. */
+export interface CreateWebhookInput {
+    url: string;
+    events: WebhookEvent[];
+    secret?: string;
+}
+/** A webhook subscription. */
+export interface Webhook {
+    id: string;
+    url: string;
+    events: WebhookEvent[];
+    secret: string;
+    createdAt: number;
+}
+/** API response for creating a webhook. */
+export interface CreateWebhookResponse extends ApiResponse {
+    webhook: Webhook;
+}
+/** API response for listing webhooks. */
+export interface ListWebhooksResponse extends ApiResponse {
+    webhooks: Webhook[];
+}
+/** API key type. */
+export type ApiKeyType = 'secret' | 'public';
+/** Available API key scopes. */
+export type ApiKeyScope = 'listings:read' | 'listings:write' | 'users:read' | 'users:write' | 'webhooks:manage' | 'analytics:read';
+/** Input for creating an API key. */
+export interface CreateApiKeyInput {
+    name: string;
+    type: ApiKeyType;
+    scopes: ApiKeyScope[];
+}
+/** An API key. */
+export interface ApiKey {
+    id: string;
+    name: string;
+    key: string;
+    type: ApiKeyType;
+    scopes: ApiKeyScope[];
+    lastUsed: string | null;
+    requests: number;
+    createdAt: number;
+}
+/** API response for creating an API key. */
+export interface CreateApiKeyResponse extends ApiResponse {
+    apiKey: ApiKey;
+}
+/** API response for listing API keys. */
+export interface ListApiKeysResponse extends ApiResponse {
+    apiKeys: ApiKey[];
 }
 //# sourceMappingURL=types.d.ts.map
